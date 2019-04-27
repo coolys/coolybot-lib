@@ -1,1 +1,2 @@
-# coolybot
+Coolybot server-side library
+----------------------------

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoolybotMetricsEndpoint.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Coolybot server-side framework</a> &gt; <a href="index.source.html" class="el_package">io.github.coolys.config.metric</a> &gt; <span class="el_source">CoolybotMetricsEndpoint.java</span></div><h1>CoolybotMetricsEndpoint.java</h1><pre class="source lang-java linenums">package io.github.coolys.config.metric;
+
+import io.micrometer.core.instrument.*;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.distribution.ValueAtPercentile;
+import io.micrometer.core.instrument.search.Search;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+@WebEndpoint(id = &quot;clb-metrics&quot;)
+public class CoolybotMetricsEndpoint {
+
+    private final MeterRegistry meterRegistry;
+
+<span class="nc" id="L18">    public CoolybotMetricsEndpoint(MeterRegistry meterRegistry) {</span>
+<span class="nc" id="L19">        this.meterRegistry = meterRegistry;</span>
+<span class="nc" id="L20">    }</span>
+
+    /**
+     * GET /management/clb-metrics
+     * &lt;p&gt;
+     * Give metrics displayed on Metrics page
+     *
+     * @return a Map with a String defining a category of metrics as Key and
+     * another Map containing metrics related to this category as Value
+     */
+    @ReadOperation
+    public Map&lt;String, Map&gt; allMetrics() {
+
+<span class="nc" id="L33">        Map&lt;String, Map&gt; results = new HashMap&lt;&gt;();</span>
+        // JVM stats
+<span class="nc" id="L35">        results.put(&quot;jvm&quot;, this.jvmMemoryMetrics());</span>
+        // HTTP requests stats
+<span class="nc" id="L37">        results.put(&quot;http.server.requests&quot;, this.httpRequestsMetrics());</span>
+        // Cache stats
+<span class="nc" id="L39">        results.put(&quot;cache&quot;, this.cacheMetrics());</span>
+        // Service stats
+<span class="nc" id="L41">        results.put(&quot;services&quot;, this.serviceMetrics());</span>
+        // Database stats
+<span class="nc" id="L43">        results.put(&quot;databases&quot;, this.databaseMetrics());</span>
+        // Garbage collector
+<span class="nc" id="L45">        results.put(&quot;garbageCollector&quot;, this.garbageCollectorMetrics());</span>
+        // Process stats
+<span class="nc" id="L47">        results.put(&quot;processMetrics&quot;, this.processMetrics());</span>
+
+<span class="nc" id="L49">        return results;</span>
+    }
+
+    private Map&lt;String, Number&gt; processMetrics() {
+<span class="nc" id="L53">        Map&lt;String, Number&gt; resultsProcess = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L55" title="All 6 branches missed.">        Collection&lt;Gauge&gt; gauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;cpu&quot;) || s.contains(&quot;system&quot;) || s.contains(&quot;process&quot;)).gauges();</span>
+<span class="nc" id="L56">        gauges.forEach(gauge -&gt; resultsProcess.put(gauge.getId().getName(), gauge.value()));</span>
+
+<span class="nc" id="L58">        Collection&lt;TimeGauge&gt; timeGauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;process&quot;)).timeGauges();</span>
+<span class="nc" id="L59">        timeGauges.forEach(gauge -&gt; resultsProcess.put(gauge.getId().getName(), gauge.value(TimeUnit.MILLISECONDS)));</span>
+
+<span class="nc" id="L61">        return resultsProcess;</span>
+    }
+
+    private Map&lt;String, Object&gt; garbageCollectorMetrics() {
+<span class="nc" id="L65">        Map&lt;String, Object&gt; resultsGarbageCollector = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L67">        Collection&lt;Timer&gt; timers = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.gc.pause&quot;)).timers();</span>
+<span class="nc" id="L68">        timers.forEach(timer -&gt; {</span>
+<span class="nc" id="L69">            String key = timer.getId().getName();</span>
+
+<span class="nc" id="L71">            HashMap&lt;String, Number&gt; gcPauseResults = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L72">            gcPauseResults.put(&quot;count&quot;, timer.count());</span>
+<span class="nc" id="L73">            gcPauseResults.put(&quot;max&quot;, timer.max(TimeUnit.MILLISECONDS));</span>
+<span class="nc" id="L74">            gcPauseResults.put(&quot;totalTime&quot;, timer.totalTime(TimeUnit.MILLISECONDS));</span>
+<span class="nc" id="L75">            gcPauseResults.put(&quot;mean&quot;, timer.mean(TimeUnit.MILLISECONDS));</span>
+
+<span class="nc" id="L77">            ValueAtPercentile[] percentiles = timer.takeSnapshot().percentileValues();</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            for (ValueAtPercentile percentile : percentiles) {</span>
+<span class="nc" id="L79">                gcPauseResults.put(String.valueOf(percentile.percentile()), percentile.value(TimeUnit.MILLISECONDS));</span>
+            }
+
+<span class="nc" id="L82">            resultsGarbageCollector.putIfAbsent(key, gcPauseResults);</span>
+<span class="nc" id="L83">        });</span>
+
+<span class="nc bnc" id="L85" title="All 4 branches missed.">        Collection&lt;Gauge&gt; gauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.gc&quot;) &amp;&amp; !s.contains(&quot;jvm.gc.pause&quot;)).gauges();</span>
+<span class="nc" id="L86">        gauges.forEach(gauge -&gt; resultsGarbageCollector.put(gauge.getId().getName(), gauge.value()));</span>
+
+<span class="nc bnc" id="L88" title="All 4 branches missed.">        Collection&lt;Counter&gt; counters = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.gc&quot;) &amp;&amp; !s.contains(&quot;jvm.gc.pause&quot;)).counters();</span>
+<span class="nc" id="L89">        counters.forEach(counter -&gt; resultsGarbageCollector.put(counter.getId().getName(), counter.count()));</span>
+
+<span class="nc" id="L91">        gauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.classes.loaded&quot;)).gauges();</span>
+<span class="nc" id="L92">        Double classesLoaded = gauges.stream().map(Gauge::value).reduce((x, y) -&gt; (x + y)).orElse((double) 0);</span>
+<span class="nc" id="L93">        resultsGarbageCollector.put(&quot;classesLoaded&quot;, classesLoaded);</span>
+
+<span class="nc" id="L95">        Collection&lt;FunctionCounter&gt; functionCounters = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.classes.unloaded&quot;)).functionCounters();</span>
+<span class="nc" id="L96">        Double classesUnloaded = functionCounters.stream().map(FunctionCounter::count).reduce((x, y) -&gt; (x + y)).orElse((double) 0);</span>
+<span class="nc" id="L97">        resultsGarbageCollector.put(&quot;classesUnloaded&quot;, classesUnloaded);</span>
+
+<span class="nc" id="L99">        return resultsGarbageCollector;</span>
+    }
+
+    private Map&lt;String, Map&lt;String, Number&gt;&gt; databaseMetrics() {
+<span class="nc" id="L103">        Map&lt;String, Map&lt;String, Number&gt;&gt; resultsDatabase = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L105">        Collection&lt;Timer&gt; timers = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;hikari&quot;)).timers();</span>
+<span class="nc" id="L106">        timers.forEach(timer -&gt; {</span>
+<span class="nc" id="L107">            String key = timer.getId().getName().substring(timer.getId().getName().lastIndexOf('.') + 1);</span>
+
+<span class="nc" id="L109">            resultsDatabase.putIfAbsent(key, new HashMap&lt;&gt;());</span>
+<span class="nc" id="L110">            resultsDatabase.get(key).put(&quot;count&quot;, timer.count());</span>
+<span class="nc" id="L111">            resultsDatabase.get(key).put(&quot;max&quot;, timer.max(TimeUnit.MILLISECONDS));</span>
+<span class="nc" id="L112">            resultsDatabase.get(key).put(&quot;totalTime&quot;, timer.totalTime(TimeUnit.MILLISECONDS));</span>
+<span class="nc" id="L113">            resultsDatabase.get(key).put(&quot;mean&quot;, timer.mean(TimeUnit.MILLISECONDS));</span>
+
+<span class="nc" id="L115">            ValueAtPercentile[] percentiles = timer.takeSnapshot().percentileValues();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            for (ValueAtPercentile percentile : percentiles) {</span>
+<span class="nc" id="L117">                resultsDatabase.get(key).put(String.valueOf(percentile.percentile()), percentile.value(TimeUnit.MILLISECONDS));</span>
+            }
+<span class="nc" id="L119">        });</span>
+
+<span class="nc" id="L121">        Collection&lt;Gauge&gt; gauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;hikari&quot;)).gauges();</span>
+<span class="nc" id="L122">        gauges.forEach(gauge -&gt; {</span>
+<span class="nc" id="L123">            String key = gauge.getId().getName().substring(gauge.getId().getName().lastIndexOf('.') + 1);</span>
+<span class="nc" id="L124">            resultsDatabase.putIfAbsent(key, new HashMap&lt;&gt;());</span>
+<span class="nc" id="L125">            resultsDatabase.get(key).put(&quot;value&quot;, gauge.value());</span>
+<span class="nc" id="L126">        });</span>
+
+<span class="nc" id="L128">        return resultsDatabase;</span>
+    }
+
+    private Map&lt;String, Map&gt; serviceMetrics() {
+<span class="nc" id="L132">        Collection&lt;String&gt; crudOperation = Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;);</span>
+
+<span class="nc" id="L134">        Set&lt;String&gt; uris = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L135">        Collection&lt;Timer&gt; timers = this.meterRegistry.find(&quot;http.server.requests&quot;).timers();</span>
+
+<span class="nc" id="L137">        timers.forEach(timer -&gt; uris.add(timer.getId().getTag(&quot;uri&quot;)));</span>
+<span class="nc" id="L138">        Map&lt;String, Map&gt; resultsHttpPerUri = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L140">        uris.forEach(uri -&gt; {</span>
+<span class="nc" id="L141">            Map&lt;String, Map&gt; resultsPerUri = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L143">            crudOperation.forEach(operation -&gt; {</span>
+<span class="nc" id="L144">                Map&lt;String, Number&gt; resultsPerUriPerCrudOperation = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L146">                Collection&lt;Timer&gt; httpTimersStream = this.meterRegistry.find(&quot;http.server.requests&quot;).tags(&quot;uri&quot;, uri, &quot;method&quot;, operation).timers();</span>
+<span class="nc" id="L147">                long count = httpTimersStream.stream().map(Timer::count).reduce((x, y) -&gt; x + y).orElse(0L);</span>
+
+<span class="nc bnc" id="L149" title="All 2 branches missed.">                if (count != 0) {</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                    double max = httpTimersStream.stream().map(x -&gt; x.max(TimeUnit.MILLISECONDS)).reduce((x, y) -&gt; x &gt; y ? x : y).orElse((double) 0);</span>
+<span class="nc" id="L151">                    double totalTime = httpTimersStream.stream().map(x -&gt; x.totalTime(TimeUnit.MILLISECONDS)).reduce((x, y) -&gt; (x + y)).orElse((double) 0);</span>
+
+<span class="nc" id="L153">                    resultsPerUriPerCrudOperation.put(&quot;count&quot;, count);</span>
+<span class="nc" id="L154">                    resultsPerUriPerCrudOperation.put(&quot;max&quot;, max);</span>
+<span class="nc" id="L155">                    resultsPerUriPerCrudOperation.put(&quot;mean&quot;, totalTime / count);</span>
+
+<span class="nc" id="L157">                    resultsPerUri.put(operation, resultsPerUriPerCrudOperation);</span>
+                }
+<span class="nc" id="L159">            });</span>
+
+<span class="nc" id="L161">            resultsHttpPerUri.put(uri, resultsPerUri);</span>
+<span class="nc" id="L162">        });</span>
+
+<span class="nc" id="L164">        return resultsHttpPerUri;</span>
+    }
+
+    private Map&lt;String, Map&lt;String, Number&gt;&gt; cacheMetrics() {
+<span class="nc" id="L168">        Map&lt;String, Map&lt;String, Number&gt;&gt; resultsCache = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L170" title="All 4 branches missed.">        Collection&lt;FunctionCounter&gt; counters = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;cache&quot;) &amp;&amp; !s.contains(&quot;hibernate&quot;)).functionCounters();</span>
+<span class="nc" id="L171">        counters.forEach(counter -&gt; {</span>
+<span class="nc" id="L172">            String name = counter.getId().getTag(&quot;name&quot;);</span>
+
+<span class="nc" id="L174">            resultsCache.putIfAbsent(name, new HashMap&lt;&gt;());</span>
+<span class="nc" id="L175">            String key = counter.getId().getName();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">            if (counter.getId().getTag(&quot;result&quot;) != null) {</span>
+<span class="nc" id="L177">                key += &quot;.&quot; + counter.getId().getTag(&quot;result&quot;);</span>
+            }
+<span class="nc" id="L179">            resultsCache.get(name).put(key, counter.count());</span>
+<span class="nc" id="L180">        });</span>
+
+<span class="nc" id="L182">        Collection&lt;Gauge&gt; gauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;cache&quot;)).gauges();</span>
+<span class="nc" id="L183">        gauges.forEach(gauge -&gt; {</span>
+<span class="nc" id="L184">            String name = gauge.getId().getTag(&quot;name&quot;);</span>
+<span class="nc" id="L185">            resultsCache.putIfAbsent(name, new HashMap&lt;&gt;());</span>
+
+<span class="nc" id="L187">            String key = gauge.getId().getName();</span>
+<span class="nc" id="L188">            resultsCache.get(name).put(key, gauge.value());</span>
+<span class="nc" id="L189">        });</span>
+<span class="nc" id="L190">        return resultsCache;</span>
+    }
+
+    private Map&lt;String, Map&lt;String, Number&gt;&gt; jvmMemoryMetrics() {
+<span class="nc" id="L194">        Map&lt;String, Map&lt;String, Number&gt;&gt; resultsJvm = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L196">        Search jvmUsedSearch = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.memory.used&quot;));</span>
+
+<span class="nc" id="L198">        Collection&lt;Gauge&gt; gauges = jvmUsedSearch.gauges();</span>
+<span class="nc" id="L199">        gauges.forEach(gauge -&gt; {</span>
+<span class="nc" id="L200">            String key = gauge.getId().getTag(&quot;id&quot;);</span>
+<span class="nc" id="L201">            resultsJvm.putIfAbsent(key, new HashMap&lt;&gt;());</span>
+<span class="nc" id="L202">            resultsJvm.get(key).put(&quot;used&quot;, gauge.value());</span>
+<span class="nc" id="L203">        });</span>
+
+<span class="nc" id="L205">        Search jvmMaxSearch = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.memory.max&quot;));</span>
+
+<span class="nc" id="L207">        gauges = jvmMaxSearch.gauges();</span>
+<span class="nc" id="L208">        gauges.forEach(gauge -&gt; {</span>
+<span class="nc" id="L209">            String key = gauge.getId().getTag(&quot;id&quot;);</span>
+<span class="nc" id="L210">            resultsJvm.get(key).put(&quot;max&quot;, gauge.value());</span>
+<span class="nc" id="L211">        });</span>
+
+<span class="nc" id="L213">        gauges = Search.in(this.meterRegistry).name(s -&gt; s.contains(&quot;jvm.memory.committed&quot;)).gauges();</span>
+<span class="nc" id="L214">        gauges.forEach(gauge -&gt; {</span>
+<span class="nc" id="L215">            String key = gauge.getId().getTag(&quot;id&quot;);</span>
+<span class="nc" id="L216">            resultsJvm.get(key).put(&quot;committed&quot;, gauge.value());</span>
+<span class="nc" id="L217">        });</span>
+
+<span class="nc" id="L219">        return resultsJvm;</span>
+    }
+
+    private Map&lt;String, Map&gt; httpRequestsMetrics() {
+<span class="nc" id="L223">        Set&lt;String&gt; statusCode = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L224">        Collection&lt;Timer&gt; timers = this.meterRegistry.find(&quot;http.server.requests&quot;).timers();</span>
+
+<span class="nc" id="L226">        timers.forEach(timer -&gt; statusCode.add(timer.getId().getTag(&quot;status&quot;)));</span>
+
+<span class="nc" id="L228">        Map&lt;String, Map&gt; resultsHttp = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L229">        Map&lt;String, Map&lt;String, Number&gt;&gt; resultsHttpPerCode = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L231">        statusCode.forEach(code -&gt; {</span>
+<span class="nc" id="L232">            Map&lt;String, Number&gt; resultsPerCode = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L234">            Collection&lt;Timer&gt; httpTimersStream = this.meterRegistry.find(&quot;http.server.requests&quot;).tag(&quot;status&quot;, code).timers();</span>
+<span class="nc" id="L235">            long count = httpTimersStream.stream().map(Timer::count).reduce((x, y) -&gt; x + y).orElse(0L);</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">            double max = httpTimersStream.stream().map(x -&gt; x.max(TimeUnit.MILLISECONDS)).reduce((x, y) -&gt; x &gt; y ? x : y).orElse((double) 0);</span>
+<span class="nc" id="L237">            double totalTime = httpTimersStream.stream().map(x -&gt; x.totalTime(TimeUnit.MILLISECONDS)).reduce((x, y) -&gt; (x + y)).orElse((double) 0);</span>
+
+<span class="nc" id="L239">            resultsPerCode.put(&quot;count&quot;, count);</span>
+<span class="nc" id="L240">            resultsPerCode.put(&quot;max&quot;, max);</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">            resultsPerCode.put(&quot;mean&quot;, count != 0 ? totalTime / count : 0);</span>
+
+<span class="nc" id="L243">            resultsHttpPerCode.put(code, resultsPerCode);</span>
+<span class="nc" id="L244">        });</span>
+
+<span class="nc" id="L246">        resultsHttp.put(&quot;percode&quot;, resultsHttpPerCode);</span>
+
+<span class="nc" id="L248">        timers = this.meterRegistry.find(&quot;http.server.requests&quot;).timers();</span>
+<span class="nc" id="L249">        long countAllrequests = timers.stream().map(Timer::count).reduce((x, y) -&gt; x + y).orElse(0L);</span>
+<span class="nc" id="L250">        Map&lt;String, Number&gt; resultsHTTPAll = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L251">        resultsHTTPAll.put(&quot;count&quot;, countAllrequests);</span>
+
+<span class="nc" id="L253">        resultsHttp.put(&quot;all&quot;, resultsHTTPAll);</span>
+
+<span class="nc" id="L255">        return resultsHttp;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -1,0 +1,943 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoolybotProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Coolybot server-side framework</a> &gt; <a href="index.source.html" class="el_package">io.github.coolys.config</a> &gt; <span class="el_source">CoolybotProperties.java</span></div><h1>CoolybotProperties.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2016-2019 the original author or authors from the Coolybot project.
+ *
+ * This file is part of the Coolybot project, see https://www.coolybot.tech/
+ * for more information.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.github.coolys.config;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
+import org.springframework.web.cors.CorsConfiguration;
+
+/**
+ * Properties specific to Coolybot.
+ *
+ * &lt;p&gt; Properties are configured in the application.yml file. &lt;/p&gt;
+ * &lt;p&gt; This class also load properties in the Spring Environment from the git.properties and META-INF/build-info.properties
+ * files if they are found in the classpath.&lt;/p&gt;
+ */
+@ConfigurationProperties(prefix = &quot;coolybot&quot;, ignoreUnknownFields = false)
+@PropertySources({
+    @PropertySource(value = &quot;classpath:git.properties&quot;, ignoreResourceNotFound = true),
+    @PropertySource(value = &quot;classpath:META-INF/build-info.properties&quot;, ignoreResourceNotFound = true)
+})
+<span class="fc" id="L44">public class CoolybotProperties {</span>
+
+<span class="fc" id="L46">    private final Async async = new Async();</span>
+
+<span class="fc" id="L48">    private final Http http = new Http();</span>
+
+<span class="fc" id="L50">    private final Cache cache = new Cache();</span>
+
+<span class="fc" id="L52">    private final Mail mail = new Mail();</span>
+
+<span class="fc" id="L54">    private final Security security = new Security();</span>
+
+<span class="fc" id="L56">    private final Swagger swagger = new Swagger();</span>
+
+<span class="fc" id="L58">    private final Metrics metrics = new Metrics();</span>
+
+<span class="fc" id="L60">    private final Logging logging = new Logging();</span>
+
+<span class="fc" id="L62">    private final CorsConfiguration cors = new CorsConfiguration();</span>
+
+<span class="fc" id="L64">    private final Social social = new Social();</span>
+
+<span class="fc" id="L66">    private final Gateway gateway = new Gateway();</span>
+
+<span class="fc" id="L68">    private final Registry registry = new Registry();</span>
+
+    public Async getAsync() {
+<span class="fc" id="L71">        return async;</span>
+    }
+
+    public Http getHttp() {
+<span class="fc" id="L75">        return http;</span>
+    }
+
+    public Cache getCache() {
+<span class="fc" id="L79">        return cache;</span>
+    }
+
+    public Mail getMail() {
+<span class="fc" id="L83">        return mail;</span>
+    }
+
+    public Registry getRegistry() {
+<span class="fc" id="L87">        return registry;</span>
+    }
+
+    public Security getSecurity() {
+<span class="fc" id="L91">        return security;</span>
+    }
+
+    public Swagger getSwagger() {
+<span class="fc" id="L95">        return swagger;</span>
+    }
+
+    public Metrics getMetrics() {
+<span class="fc" id="L99">        return metrics;</span>
+    }
+
+    public Logging getLogging() {
+<span class="fc" id="L103">        return logging;</span>
+    }
+
+    public CorsConfiguration getCors() {
+<span class="fc" id="L107">        return cors;</span>
+    }
+
+    public Social getSocial() {
+<span class="fc" id="L111">        return social;</span>
+    }
+
+    public Gateway getGateway() {
+<span class="fc" id="L115">        return gateway;</span>
+    }
+
+<span class="fc" id="L118">    public static class Async {</span>
+
+<span class="fc" id="L120">        private int corePoolSize = CoolybotDefaults.Async.corePoolSize;</span>
+
+<span class="fc" id="L122">        private int maxPoolSize = CoolybotDefaults.Async.maxPoolSize;</span>
+
+<span class="fc" id="L124">        private int queueCapacity = CoolybotDefaults.Async.queueCapacity;</span>
+
+        public int getCorePoolSize() {
+<span class="fc" id="L127">            return corePoolSize;</span>
+        }
+
+        public void setCorePoolSize(int corePoolSize) {
+<span class="fc" id="L131">            this.corePoolSize = corePoolSize;</span>
+<span class="fc" id="L132">        }</span>
+
+        public int getMaxPoolSize() {
+<span class="fc" id="L135">            return maxPoolSize;</span>
+        }
+
+        public void setMaxPoolSize(int maxPoolSize) {
+<span class="fc" id="L139">            this.maxPoolSize = maxPoolSize;</span>
+<span class="fc" id="L140">        }</span>
+
+        public int getQueueCapacity() {
+<span class="fc" id="L143">            return queueCapacity;</span>
+        }
+
+        public void setQueueCapacity(int queueCapacity) {
+<span class="fc" id="L147">            this.queueCapacity = queueCapacity;</span>
+<span class="fc" id="L148">        }</span>
+    }
+
+<span class="fc" id="L151">    public static class Http {</span>
+
+<span class="fc" id="L153">        public enum Version {V_1_1, V_2_0}</span>
+
+<span class="fc" id="L155">        private final Cache cache = new Cache();</span>
+
+        /**
+         * Https has to be active with cipher suite define also
+         */
+<span class="fc" id="L160">        private boolean useUndertowUserCipherSuitesOrder = CoolybotDefaults.Http.useUndertowUserCipherSuitesOrder;</span>
+
+        /**
+         * HTTP version, must be &quot;V_1_1&quot; (for HTTP/1.1) or V_2_0 (for (HTTP/2)
+         */
+<span class="fc" id="L165">        public Version version = CoolybotDefaults.Http.version;</span>
+
+        public Cache getCache() {
+<span class="fc" id="L168">            return cache;</span>
+        }
+
+        public Version getVersion() {
+<span class="fc" id="L172">            return version;</span>
+        }
+
+        public void setVersion(Version version) {
+<span class="fc" id="L176">            this.version = version;</span>
+<span class="fc" id="L177">        }</span>
+
+<span class="fc" id="L179">        public static class Cache {</span>
+
+<span class="fc" id="L181">            private int timeToLiveInDays = CoolybotDefaults.Http.Cache.timeToLiveInDays;</span>
+
+            public int getTimeToLiveInDays() {
+<span class="fc" id="L184">                return timeToLiveInDays;</span>
+            }
+
+            public void setTimeToLiveInDays(int timeToLiveInDays) {
+<span class="fc" id="L188">                this.timeToLiveInDays = timeToLiveInDays;</span>
+<span class="fc" id="L189">            }</span>
+        }
+
+        public boolean isUseUndertowUserCipherSuitesOrder() {
+<span class="fc" id="L193">            return useUndertowUserCipherSuitesOrder;</span>
+        }
+
+        public void setUseUndertowUserCipherSuitesOrder(boolean useUndertowUserCipherSuitesOrder) {
+<span class="fc" id="L197">            this.useUndertowUserCipherSuitesOrder = useUndertowUserCipherSuitesOrder;</span>
+<span class="fc" id="L198">        }</span>
+    }
+
+<span class="fc" id="L201">    public static class Cache {</span>
+
+<span class="fc" id="L203">        private final Hazelcast hazelcast = new Hazelcast();</span>
+
+<span class="fc" id="L205">        private final Ehcache ehcache = new Ehcache();</span>
+
+<span class="fc" id="L207">        private final Infinispan infinispan = new Infinispan();</span>
+
+<span class="fc" id="L209">        private final Memcached memcached = new Memcached();</span>
+
+        public Hazelcast getHazelcast() {
+<span class="fc" id="L212">            return hazelcast;</span>
+        }
+
+        public Ehcache getEhcache() {
+<span class="fc" id="L216">            return ehcache;</span>
+        }
+
+        public Infinispan getInfinispan() {
+<span class="fc" id="L220">            return infinispan;</span>
+        }
+
+        public Memcached getMemcached() {
+<span class="fc" id="L224">            return memcached;</span>
+        }
+
+<span class="fc" id="L227">        public static class Hazelcast {</span>
+
+<span class="fc" id="L229">            private int timeToLiveSeconds = CoolybotDefaults.Cache.Hazelcast.timeToLiveSeconds;</span>
+
+<span class="fc" id="L231">            private int backupCount = CoolybotDefaults.Cache.Hazelcast.backupCount;</span>
+
+<span class="fc" id="L233">            private final ManagementCenter managementCenter = new ManagementCenter();</span>
+
+            public ManagementCenter getManagementCenter() {
+<span class="fc" id="L236">                return managementCenter;</span>
+            }
+
+<span class="fc" id="L239">            public static class ManagementCenter {</span>
+
+<span class="fc" id="L241">                private boolean enabled = CoolybotDefaults.Cache.Hazelcast.ManagementCenter.enabled;</span>
+
+<span class="fc" id="L243">                private int updateInterval = CoolybotDefaults.Cache.Hazelcast.ManagementCenter.updateInterval;</span>
+
+<span class="fc" id="L245">                private String url =  CoolybotDefaults.Cache.Hazelcast.ManagementCenter.url;</span>
+
+                public boolean isEnabled() {
+<span class="fc" id="L248">                    return enabled;</span>
+                }
+
+                public void setEnabled(boolean enabled) {
+<span class="fc" id="L252">                    this.enabled = enabled;</span>
+<span class="fc" id="L253">                }</span>
+
+                public int getUpdateInterval() {
+<span class="fc" id="L256">                    return updateInterval;</span>
+                }
+
+                public void setUpdateInterval(int updateInterval) {
+<span class="fc" id="L260">                    this.updateInterval = updateInterval;</span>
+<span class="fc" id="L261">                }</span>
+
+                public String getUrl() {
+<span class="fc" id="L264">                    return url;</span>
+                }
+
+                public void setUrl(String url) {
+<span class="fc" id="L268">                    this.url = url;</span>
+<span class="fc" id="L269">                }</span>
+
+            }
+
+            public int getTimeToLiveSeconds() {
+<span class="fc" id="L274">                return timeToLiveSeconds;</span>
+            }
+
+            public void setTimeToLiveSeconds(int timeToLiveSeconds) {
+<span class="fc" id="L278">                this.timeToLiveSeconds = timeToLiveSeconds;</span>
+<span class="fc" id="L279">            }</span>
+
+            public int getBackupCount() {
+<span class="fc" id="L282">                return backupCount;</span>
+            }
+
+            public void setBackupCount(int backupCount) {
+<span class="fc" id="L286">                this.backupCount = backupCount;</span>
+<span class="fc" id="L287">            }</span>
+        }
+
+<span class="fc" id="L290">        public static class Ehcache {</span>
+
+<span class="fc" id="L292">            private int timeToLiveSeconds = CoolybotDefaults.Cache.Ehcache.timeToLiveSeconds;</span>
+
+<span class="fc" id="L294">            private long maxEntries = CoolybotDefaults.Cache.Ehcache.maxEntries;</span>
+
+            public int getTimeToLiveSeconds() {
+<span class="fc" id="L297">                return timeToLiveSeconds;</span>
+            }
+
+            public void setTimeToLiveSeconds(int timeToLiveSeconds) {
+<span class="fc" id="L301">                this.timeToLiveSeconds = timeToLiveSeconds;</span>
+<span class="fc" id="L302">            }</span>
+
+            public long getMaxEntries() {
+<span class="fc" id="L305">                return maxEntries;</span>
+            }
+
+            public void setMaxEntries(long maxEntries) {
+<span class="fc" id="L309">                this.maxEntries = maxEntries;</span>
+<span class="fc" id="L310">            }</span>
+        }
+
+<span class="fc" id="L313">        public static class Infinispan {</span>
+
+<span class="fc" id="L315">            private String configFile = CoolybotDefaults.Cache.Infinispan.configFile;</span>
+
+<span class="fc" id="L317">            private boolean statsEnabled = CoolybotDefaults.Cache.Infinispan.statsEnabled;</span>
+
+<span class="fc" id="L319">            private final Local local = new Local();</span>
+
+<span class="fc" id="L321">            private final Distributed distributed = new Distributed();</span>
+
+<span class="fc" id="L323">            private final Replicated replicated = new Replicated();</span>
+
+            public String getConfigFile() {
+<span class="fc" id="L326">                return configFile;</span>
+            }
+
+            public void setConfigFile(String configFile) {
+<span class="fc" id="L330">                this.configFile = configFile;</span>
+<span class="fc" id="L331">            }</span>
+
+            public boolean isStatsEnabled() {
+<span class="fc" id="L334">                return statsEnabled;</span>
+            }
+
+            public void setStatsEnabled(boolean statsEnabled) {
+<span class="fc" id="L338">                this.statsEnabled = statsEnabled;</span>
+<span class="fc" id="L339">            }</span>
+
+            public Local getLocal() {
+<span class="fc" id="L342">                return local;</span>
+            }
+
+            public Distributed getDistributed() {
+<span class="fc" id="L346">                return distributed;</span>
+            }
+
+            public Replicated getReplicated() {
+<span class="fc" id="L350">                return replicated;</span>
+            }
+
+<span class="fc" id="L353">            public static class Local {</span>
+
+<span class="fc" id="L355">                private long timeToLiveSeconds = CoolybotDefaults.Cache.Infinispan.Local.timeToLiveSeconds;</span>
+
+<span class="fc" id="L357">                private long maxEntries = CoolybotDefaults.Cache.Infinispan.Local.maxEntries;</span>
+
+                public long getTimeToLiveSeconds() {
+<span class="fc" id="L360">                    return timeToLiveSeconds;</span>
+                }
+
+                public void setTimeToLiveSeconds(long timeToLiveSeconds) {
+<span class="fc" id="L364">                    this.timeToLiveSeconds = timeToLiveSeconds;</span>
+<span class="fc" id="L365">                }</span>
+
+                public long getMaxEntries() {
+<span class="fc" id="L368">                    return maxEntries;</span>
+                }
+
+                public void setMaxEntries(long maxEntries) {
+<span class="fc" id="L372">                    this.maxEntries = maxEntries;</span>
+<span class="fc" id="L373">                }</span>
+
+            }
+
+<span class="fc" id="L377">            public static class Distributed {</span>
+
+<span class="fc" id="L379">                private long timeToLiveSeconds = CoolybotDefaults.Cache.Infinispan.Distributed.timeToLiveSeconds;</span>
+
+<span class="fc" id="L381">                private long maxEntries = CoolybotDefaults.Cache.Infinispan.Distributed.maxEntries;</span>
+
+<span class="fc" id="L383">                private int instanceCount = CoolybotDefaults.Cache.Infinispan.Distributed.instanceCount;</span>
+
+                public long getTimeToLiveSeconds() {
+<span class="fc" id="L386">                    return timeToLiveSeconds;</span>
+                }
+
+                public void setTimeToLiveSeconds(long timeToLiveSeconds) {
+<span class="fc" id="L390">                    this.timeToLiveSeconds = timeToLiveSeconds;</span>
+<span class="fc" id="L391">                }</span>
+
+                public long getMaxEntries() {
+<span class="fc" id="L394">                    return maxEntries;</span>
+                }
+
+                public void setMaxEntries(long maxEntries) {
+<span class="fc" id="L398">                    this.maxEntries = maxEntries;</span>
+<span class="fc" id="L399">                }</span>
+
+                public int getInstanceCount() {
+<span class="fc" id="L402">                    return instanceCount;</span>
+                }
+
+                public void setInstanceCount(int instanceCount) {
+<span class="fc" id="L406">                    this.instanceCount = instanceCount;</span>
+<span class="fc" id="L407">                }</span>
+            }
+
+<span class="fc" id="L410">            public static class Replicated {</span>
+
+<span class="fc" id="L412">                private long timeToLiveSeconds = CoolybotDefaults.Cache.Infinispan.Replicated.timeToLiveSeconds;</span>
+
+<span class="fc" id="L414">                private long maxEntries = CoolybotDefaults.Cache.Infinispan.Replicated.maxEntries;</span>
+
+                public long getTimeToLiveSeconds() {
+<span class="fc" id="L417">                    return timeToLiveSeconds;</span>
+                }
+
+                public void setTimeToLiveSeconds(long timeToLiveSeconds) {
+<span class="fc" id="L421">                    this.timeToLiveSeconds = timeToLiveSeconds;</span>
+<span class="fc" id="L422">                }</span>
+
+                public long getMaxEntries() {
+<span class="fc" id="L425">                    return maxEntries;</span>
+                }
+
+                public void setMaxEntries(long maxEntries) {
+<span class="fc" id="L429">                    this.maxEntries = maxEntries;</span>
+<span class="fc" id="L430">                }</span>
+
+            }
+        }
+
+<span class="fc" id="L435">        public static class Memcached {</span>
+
+<span class="fc" id="L437">            private boolean enabled = CoolybotDefaults.Cache.Memcached.enabled;</span>
+
+            /**
+             * Comma or whitespace separated list of servers' addresses.
+             */
+<span class="fc" id="L442">            private String servers = CoolybotDefaults.Cache.Memcached.servers;</span>
+
+<span class="fc" id="L444">            private int expiration = CoolybotDefaults.Cache.Memcached.expiration;</span>
+
+<span class="fc" id="L446">            private boolean useBinaryProtocol = CoolybotDefaults.Cache.Memcached.useBinaryProtocol;</span>
+
+            public boolean isEnabled() {
+<span class="fc" id="L449">                return enabled;</span>
+            }
+
+            public void setEnabled(boolean enabled) {
+<span class="fc" id="L453">                this.enabled = enabled;</span>
+<span class="fc" id="L454">            }</span>
+
+            public String getServers() {
+<span class="fc" id="L457">                return servers;</span>
+            }
+
+            public void setServers(String servers) {
+<span class="fc" id="L461">                this.servers = servers;</span>
+<span class="fc" id="L462">            }</span>
+
+            public int getExpiration() {
+<span class="fc" id="L465">                return expiration;</span>
+            }
+
+            public void setExpiration(int expiration) {
+<span class="fc" id="L469">                this.expiration = expiration;</span>
+<span class="fc" id="L470">            }</span>
+
+            public boolean isUseBinaryProtocol() {
+<span class="fc" id="L473">                return useBinaryProtocol;</span>
+            }
+
+            public void setUseBinaryProtocol(boolean useBinaryProtocol) {
+<span class="fc" id="L477">                this.useBinaryProtocol = useBinaryProtocol;</span>
+<span class="fc" id="L478">            }</span>
+        }
+    }
+
+<span class="fc" id="L482">    public static class Mail {</span>
+
+<span class="fc" id="L484">        private boolean enabled = CoolybotDefaults.Mail.enabled;</span>
+
+<span class="fc" id="L486">        private String from = CoolybotDefaults.Mail.from;</span>
+
+<span class="fc" id="L488">        private String baseUrl = CoolybotDefaults.Mail.baseUrl;</span>
+
+        public boolean isEnabled() {
+<span class="fc" id="L491">            return enabled;</span>
+        }
+
+        public void setEnabled(boolean enabled) {
+<span class="fc" id="L495">            this.enabled = enabled;</span>
+<span class="fc" id="L496">        }</span>
+
+        public String getFrom() {
+<span class="fc" id="L499">            return from;</span>
+        }
+
+        public void setFrom(String from) {
+<span class="fc" id="L503">            this.from = from;</span>
+<span class="fc" id="L504">        }</span>
+
+        public String getBaseUrl() {
+<span class="fc" id="L507">            return baseUrl;</span>
+        }
+
+        public void setBaseUrl(String baseUrl) {
+<span class="fc" id="L511">            this.baseUrl = baseUrl;</span>
+<span class="fc" id="L512">        }</span>
+    }
+
+<span class="fc" id="L515">    public static class Security {</span>
+
+<span class="fc" id="L517">        private final ClientAuthorization clientAuthorization = new ClientAuthorization();</span>
+
+<span class="fc" id="L519">        private final Authentication authentication = new Authentication();</span>
+
+<span class="fc" id="L521">        private final RememberMe rememberMe = new RememberMe();</span>
+
+        public ClientAuthorization getClientAuthorization() {
+<span class="fc" id="L524">            return clientAuthorization;</span>
+        }
+
+        public Authentication getAuthentication() {
+<span class="fc" id="L528">            return authentication;</span>
+        }
+
+        public RememberMe getRememberMe() {
+<span class="fc" id="L532">            return rememberMe;</span>
+        }
+
+<span class="fc" id="L535">        public static class ClientAuthorization {</span>
+
+<span class="fc" id="L537">            private String accessTokenUri = CoolybotDefaults.Security.ClientAuthorization.accessTokenUri;</span>
+
+<span class="fc" id="L539">            private String tokenServiceId = CoolybotDefaults.Security.ClientAuthorization.tokenServiceId;</span>
+
+<span class="fc" id="L541">            private String clientId = CoolybotDefaults.Security.ClientAuthorization.clientId;</span>
+
+<span class="fc" id="L543">            private String clientSecret = CoolybotDefaults.Security.ClientAuthorization.clientSecret;</span>
+
+            public String getAccessTokenUri() {
+<span class="fc" id="L546">                return accessTokenUri;</span>
+            }
+
+            public void setAccessTokenUri(String accessTokenUri) {
+<span class="fc" id="L550">                this.accessTokenUri = accessTokenUri;</span>
+<span class="fc" id="L551">            }</span>
+
+            public String getTokenServiceId() {
+<span class="fc" id="L554">                return tokenServiceId;</span>
+            }
+
+            public void setTokenServiceId(String tokenServiceId) {
+<span class="fc" id="L558">                this.tokenServiceId = tokenServiceId;</span>
+<span class="fc" id="L559">            }</span>
+
+            public String getClientId() {
+<span class="fc" id="L562">                return clientId;</span>
+            }
+
+            public void setClientId(String clientId) {
+<span class="fc" id="L566">                this.clientId = clientId;</span>
+<span class="fc" id="L567">            }</span>
+
+            public String getClientSecret() {
+<span class="fc" id="L570">                return clientSecret;</span>
+            }
+
+            public void setClientSecret(String clientSecret) {
+<span class="fc" id="L574">                this.clientSecret = clientSecret;</span>
+<span class="fc" id="L575">            }</span>
+        }
+
+<span class="fc" id="L578">        public static class Authentication {</span>
+
+<span class="fc" id="L580">            private final Jwt jwt = new Jwt();</span>
+
+            public Jwt getJwt() {
+<span class="fc" id="L583">                return jwt;</span>
+            }
+
+<span class="fc" id="L586">            public static class Jwt {</span>
+
+<span class="fc" id="L588">                private String secret = CoolybotDefaults.Security.Authentication.Jwt.secret;</span>
+
+<span class="fc" id="L590">                private String base64Secret = CoolybotDefaults.Security.Authentication.Jwt.base64Secret;</span>
+
+<span class="fc" id="L592">                private long tokenValidityInSeconds = CoolybotDefaults.Security.Authentication.Jwt</span>
+                    .tokenValidityInSeconds;
+
+<span class="fc" id="L595">                private long tokenValidityInSecondsForRememberMe = CoolybotDefaults.Security.Authentication.Jwt</span>
+                    .tokenValidityInSecondsForRememberMe;
+
+                public String getSecret() {
+<span class="fc" id="L599">                    return secret;</span>
+                }
+
+                public void setSecret(String secret) {
+<span class="fc" id="L603">                    this.secret = secret;</span>
+<span class="fc" id="L604">                }</span>
+
+                public String getBase64Secret() {
+<span class="fc" id="L607">                    return base64Secret;</span>
+                }
+
+                public void setBase64Secret(String base64Secret) {
+<span class="fc" id="L611">                    this.base64Secret = base64Secret;</span>
+<span class="fc" id="L612">                }</span>
+
+                public long getTokenValidityInSeconds() {
+<span class="fc" id="L615">                    return tokenValidityInSeconds;</span>
+                }
+
+                public void setTokenValidityInSeconds(long tokenValidityInSeconds) {
+<span class="fc" id="L619">                    this.tokenValidityInSeconds = tokenValidityInSeconds;</span>
+<span class="fc" id="L620">                }</span>
+
+                public long getTokenValidityInSecondsForRememberMe() {
+<span class="fc" id="L623">                    return tokenValidityInSecondsForRememberMe;</span>
+                }
+
+                public void setTokenValidityInSecondsForRememberMe(long tokenValidityInSecondsForRememberMe) {
+<span class="fc" id="L627">                    this.tokenValidityInSecondsForRememberMe = tokenValidityInSecondsForRememberMe;</span>
+<span class="fc" id="L628">                }</span>
+            }
+        }
+
+<span class="fc" id="L632">        public static class RememberMe {</span>
+
+<span class="fc" id="L634">            @NotNull</span>
+            private String key = CoolybotDefaults.Security.RememberMe.key;
+
+            public String getKey() {
+<span class="fc" id="L638">                return key;</span>
+            }
+
+            public void setKey(String key) {
+<span class="fc" id="L642">                this.key = key;</span>
+<span class="fc" id="L643">            }</span>
+        }
+    }
+
+<span class="fc" id="L647">    public static class Swagger {</span>
+
+<span class="fc" id="L649">        private String title = CoolybotDefaults.Swagger.title;</span>
+
+<span class="fc" id="L651">        private String description = CoolybotDefaults.Swagger.description;</span>
+
+<span class="fc" id="L653">        private String version = CoolybotDefaults.Swagger.version;</span>
+
+<span class="fc" id="L655">        private String termsOfServiceUrl = CoolybotDefaults.Swagger.termsOfServiceUrl;</span>
+
+<span class="fc" id="L657">        private String contactName = CoolybotDefaults.Swagger.contactName;</span>
+
+<span class="fc" id="L659">        private String contactUrl = CoolybotDefaults.Swagger.contactUrl;</span>
+
+<span class="fc" id="L661">        private String contactEmail = CoolybotDefaults.Swagger.contactEmail;</span>
+
+<span class="fc" id="L663">        private String license = CoolybotDefaults.Swagger.license;</span>
+
+<span class="fc" id="L665">        private String licenseUrl = CoolybotDefaults.Swagger.licenseUrl;</span>
+
+<span class="fc" id="L667">        private String defaultIncludePattern = CoolybotDefaults.Swagger.defaultIncludePattern;</span>
+
+<span class="fc" id="L669">        private String host = CoolybotDefaults.Swagger.host;</span>
+
+<span class="fc" id="L671">        private String[] protocols = CoolybotDefaults.Swagger.protocols;</span>
+
+<span class="fc" id="L673">        private boolean useDefaultResponseMessages = CoolybotDefaults.Swagger.useDefaultResponseMessages;</span>
+
+        public String getTitle() {
+<span class="fc" id="L676">            return title;</span>
+        }
+
+        public void setTitle(String title) {
+<span class="fc" id="L680">            this.title = title;</span>
+<span class="fc" id="L681">        }</span>
+
+        public String getDescription() {
+<span class="fc" id="L684">            return description;</span>
+        }
+
+        public void setDescription(String description) {
+<span class="fc" id="L688">            this.description = description;</span>
+<span class="fc" id="L689">        }</span>
+
+        public String getVersion() {
+<span class="fc" id="L692">            return version;</span>
+        }
+
+        public void setVersion(String version) {
+<span class="fc" id="L696">            this.version = version;</span>
+<span class="fc" id="L697">        }</span>
+
+        public String getTermsOfServiceUrl() {
+<span class="fc" id="L700">            return termsOfServiceUrl;</span>
+        }
+
+        public void setTermsOfServiceUrl(String termsOfServiceUrl) {
+<span class="fc" id="L704">            this.termsOfServiceUrl = termsOfServiceUrl;</span>
+<span class="fc" id="L705">        }</span>
+
+        public String getContactName() {
+<span class="fc" id="L708">            return contactName;</span>
+        }
+
+        public void setContactName(String contactName) {
+<span class="fc" id="L712">            this.contactName = contactName;</span>
+<span class="fc" id="L713">        }</span>
+
+        public String getContactUrl() {
+<span class="fc" id="L716">            return contactUrl;</span>
+        }
+
+        public void setContactUrl(String contactUrl) {
+<span class="fc" id="L720">            this.contactUrl = contactUrl;</span>
+<span class="fc" id="L721">        }</span>
+
+        public String getContactEmail() {
+<span class="fc" id="L724">            return contactEmail;</span>
+        }
+
+        public void setContactEmail(String contactEmail) {
+<span class="fc" id="L728">            this.contactEmail = contactEmail;</span>
+<span class="fc" id="L729">        }</span>
+
+        public String getLicense() {
+<span class="fc" id="L732">            return license;</span>
+        }
+
+        public void setLicense(String license) {
+<span class="fc" id="L736">            this.license = license;</span>
+<span class="fc" id="L737">        }</span>
+
+        public String getLicenseUrl() {
+<span class="fc" id="L740">            return licenseUrl;</span>
+        }
+
+        public void setLicenseUrl(String licenseUrl) {
+<span class="fc" id="L744">            this.licenseUrl = licenseUrl;</span>
+<span class="fc" id="L745">        }</span>
+
+        public String getDefaultIncludePattern() {
+<span class="fc" id="L748">            return defaultIncludePattern;</span>
+        }
+
+        public void setDefaultIncludePattern(String defaultIncludePattern) {
+<span class="fc" id="L752">            this.defaultIncludePattern = defaultIncludePattern;</span>
+<span class="fc" id="L753">        }</span>
+
+        public String getHost() {
+<span class="fc" id="L756">            return host;</span>
+        }
+
+        public void setHost(final String host) {
+<span class="fc" id="L760">            this.host = host;</span>
+<span class="fc" id="L761">        }</span>
+
+        public String[] getProtocols() {
+<span class="fc" id="L764">            return protocols;</span>
+        }
+
+        public void setProtocols(final String[] protocols) {
+<span class="fc" id="L768">            this.protocols = protocols;</span>
+<span class="fc" id="L769">        }</span>
+
+        public boolean isUseDefaultResponseMessages() {
+<span class="fc" id="L772">            return useDefaultResponseMessages;</span>
+        }
+
+        public void setUseDefaultResponseMessages(final boolean useDefaultResponseMessages) {
+<span class="fc" id="L776">            this.useDefaultResponseMessages = useDefaultResponseMessages;</span>
+<span class="fc" id="L777">        }</span>
+    }
+
+<span class="fc" id="L780">    public static class Metrics {</span>
+
+<span class="fc" id="L782">        private final Logs logs = new Logs();</span>
+
+        public Logs getLogs() {
+<span class="fc" id="L785">            return logs;</span>
+        }
+
+<span class="fc" id="L788">        public static class Logs {</span>
+
+<span class="fc" id="L790">            private boolean enabled = CoolybotDefaults.Metrics.Logs.enabled;</span>
+
+<span class="fc" id="L792">            private long reportFrequency = CoolybotDefaults.Metrics.Logs.reportFrequency;</span>
+
+            public boolean isEnabled() {
+<span class="fc" id="L795">                return enabled;</span>
+            }
+
+            public void setEnabled(boolean enabled) {
+<span class="fc" id="L799">                this.enabled = enabled;</span>
+<span class="fc" id="L800">            }</span>
+
+            public long getReportFrequency() {
+<span class="fc" id="L803">                return reportFrequency;</span>
+            }
+
+            public void setReportFrequency(long reportFrequency) {
+<span class="fc" id="L807">                this.reportFrequency = reportFrequency;</span>
+<span class="fc" id="L808">            }</span>
+        }
+    }
+
+<span class="fc" id="L812">    public static class Logging {</span>
+
+<span class="fc" id="L814">        private final Logstash logstash = new Logstash();</span>
+
+        public Logstash getLogstash() {
+<span class="fc" id="L817">            return logstash;</span>
+        }
+
+<span class="fc" id="L820">        public static class Logstash {</span>
+
+<span class="fc" id="L822">            private boolean enabled = CoolybotDefaults.Logging.Logstash.enabled;</span>
+
+<span class="fc" id="L824">            private String host = CoolybotDefaults.Logging.Logstash.host;</span>
+
+<span class="fc" id="L826">            private int port = CoolybotDefaults.Logging.Logstash.port;</span>
+
+<span class="fc" id="L828">            private int queueSize = CoolybotDefaults.Logging.Logstash.queueSize;</span>
+
+            public boolean isEnabled() {
+<span class="fc" id="L831">                return enabled;</span>
+            }
+
+            public void setEnabled(boolean enabled) {
+<span class="fc" id="L835">                this.enabled = enabled;</span>
+<span class="fc" id="L836">            }</span>
+
+            public String getHost() {
+<span class="fc" id="L839">                return host;</span>
+            }
+
+            public void setHost(String host) {
+<span class="fc" id="L843">                this.host = host;</span>
+<span class="fc" id="L844">            }</span>
+
+            public int getPort() {
+<span class="fc" id="L847">                return port;</span>
+            }
+
+            public void setPort(int port) {
+<span class="fc" id="L851">                this.port = port;</span>
+<span class="fc" id="L852">            }</span>
+
+            public int getQueueSize() {
+<span class="fc" id="L855">                return queueSize;</span>
+            }
+
+            public void setQueueSize(int queueSize) {
+<span class="fc" id="L859">                this.queueSize = queueSize;</span>
+<span class="fc" id="L860">            }</span>
+        }
+    }
+
+<span class="fc" id="L864">    public static class Social {</span>
+
+<span class="fc" id="L866">        private String redirectAfterSignIn = CoolybotDefaults.Social.redirectAfterSignIn;</span>
+
+        public String getRedirectAfterSignIn() {
+<span class="fc" id="L869">            return redirectAfterSignIn;</span>
+        }
+
+        public void setRedirectAfterSignIn(String redirectAfterSignIn) {
+<span class="fc" id="L873">            this.redirectAfterSignIn = redirectAfterSignIn;</span>
+<span class="fc" id="L874">        }</span>
+    }
+
+<span class="fc" id="L877">    public static class Gateway {</span>
+
+<span class="fc" id="L879">        private final RateLimiting rateLimiting = new RateLimiting();</span>
+
+        public RateLimiting getRateLimiting() {
+<span class="fc" id="L882">            return rateLimiting;</span>
+        }
+
+<span class="fc" id="L885">        private Map&lt;String, List&lt;String&gt;&gt; authorizedMicroservicesEndpoints = CoolybotDefaults.Gateway</span>
+            .authorizedMicroservicesEndpoints;
+
+        public Map&lt;String, List&lt;String&gt;&gt; getAuthorizedMicroservicesEndpoints() {
+<span class="fc" id="L889">            return authorizedMicroservicesEndpoints;</span>
+        }
+
+        public void setAuthorizedMicroservicesEndpoints(Map&lt;String, List&lt;String&gt;&gt; authorizedMicroservicesEndpoints) {
+<span class="fc" id="L893">            this.authorizedMicroservicesEndpoints = authorizedMicroservicesEndpoints;</span>
+<span class="fc" id="L894">        }</span>
+
+<span class="fc" id="L896">        public static class RateLimiting {</span>
+
+<span class="fc" id="L898">            private boolean enabled = CoolybotDefaults.Gateway.RateLimiting.enabled;</span>
+
+<span class="fc" id="L900">            private long limit = CoolybotDefaults.Gateway.RateLimiting.limit;</span>
+
+<span class="fc" id="L902">            private int durationInSeconds = CoolybotDefaults.Gateway.RateLimiting.durationInSeconds;</span>
+
+            public boolean isEnabled() {
+<span class="fc" id="L905">                return enabled;</span>
+            }
+
+            public void setEnabled(boolean enabled) {
+<span class="fc" id="L909">                this.enabled = enabled;</span>
+<span class="fc" id="L910">            }</span>
+
+            public long getLimit() {
+<span class="fc" id="L913">                return this.limit;</span>
+            }
+
+            public void setLimit(long limit) {
+<span class="fc" id="L917">                this.limit = limit;</span>
+<span class="fc" id="L918">            }</span>
+
+            public int getDurationInSeconds() {
+<span class="fc" id="L921">                return durationInSeconds;</span>
+            }
+
+            public void setDurationInSeconds(int durationInSeconds) {
+<span class="fc" id="L925">                this.durationInSeconds = durationInSeconds;</span>
+<span class="fc" id="L926">            }</span>
+        }
+    }
+
+<span class="fc" id="L930">    public static class Registry {</span>
+
+<span class="fc" id="L932">        private String password = CoolybotDefaults.Registry.password;</span>
+
+        public String getPassword() {
+<span class="fc" id="L935">            return password;</span>
+        }
+
+        public void setPassword(String password) {
+<span class="fc" id="L939">            this.password = password;</span>
+<span class="fc" id="L940">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>
