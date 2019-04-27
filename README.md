@@ -1,2 +1,2 @@
-Coolybot server-side library
+Coolybot BOM and server-side library
 ----------------------------

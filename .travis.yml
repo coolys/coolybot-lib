@@ -1,0 +1,120 @@
+#
+# Copyright 2013-2019 the original author or authors from the Coolybot project.
+#
+# This file is part of the Coolybot project, see https://www.coolybot.tech/
+# for more information.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+os:
+  - linux
+services:
+  - docker
+language: node_js
+node_js:
+  - "10.13.0"
+jdk:
+  - oraclejdk8
+addons:
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle
+env:
+  global:
+    - CLB_PROFILE=dev
+    - CLB_RUN_APP=1
+    - CLB_PROTRACTOR=0
+    - CLB_ENTITY=sql
+    # this version is used for testing with CICD
+    - CLB_VERSION=0.0.0-CICD
+    # if CLB_LIB_BRANCH value is release, use the release from Maven
+    - CLB_LIB_REPO=https://github.com/coolybot/coolybot.git
+    - CLB_LIB_BRANCH=master
+    # if CLB_GEN_BRANCH value is release, use the release from NPM
+    - CLB_GEN_REPO=https://github.com/coolybot/generator-coolybot.git
+    - CLB_GEN_BRANCH=master
+    # specific config
+    - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+    - SPRING_JPA_SHOW_SQL=false
+    - CLB_DISABLE_WEBPACK_LOGS=true
+    - CLB_E2E_HEADLESS=true
+    - CLB_SCRIPTS=$HOME/generator-coolybot/test-integration/scripts
+
+  matrix:
+    - CLB_APP=ngx-default CLB_PROFILE=prod CLB_PROTRACTOR=1
+    - CLB_APP=ngx-psql-es-noi18n CLB_PROFILE=prod CLB_PROTRACTOR=1
+    - CLB_APP=ngx-gradle-fr CLB_PROFILE=prod CLB_PROTRACTOR=1
+    - CLB_APP=ngx-mariadb-oauth2-sass-infinispan CLB_PROTRACTOR=1
+    - CLB_APP=ngx-h2mem-ws-nol2
+    - CLB_APP=ngx-mongodb-kafka-cucumber CLB_ENTITY=mongodb
+    - CLB_APP=ngx-session-cassandra-fr CLB_ENTITY=cassandra
+    - CLB_APP=ngx-couchbase CLB_ENTITY=couchbase
+    - CLB_APP=ms-ngx-gateway-eureka
+    - CLB_APP=ms-ngx-gateway-consul
+    - CLB_APP=ms-ngx-gateway-uaa CLB_ENTITY=uaa
+    - CLB_APP=ms-micro-eureka CLB_ENTITY=micro
+    - CLB_APP=ms-micro-consul CLB_ENTITY=micro
+    - CLB_APP=react-default
+
+#----------------------------------------------------------------------
+# Install all tools and check configuration
+#----------------------------------------------------------------------
+before_install:
+  - jdk_switcher use oraclejdk8
+  - java -version
+  - export TZ=Australia/Canberra
+  - date
+  - sudo /etc/init.d/mysql stop
+  - sudo /etc/init.d/postgresql stop
+  # Use this for Protractor
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  # Upgrade NPM
+  - npm install -g npm
+  - $TRAVIS_BUILD_DIR/test-integration/scripts/04-git-config.sh
+
+#----------------------------------------------------------------------
+# Install Coolybot and generate project+entities
+#----------------------------------------------------------------------
+install:
+  - $TRAVIS_BUILD_DIR/test-integration/scripts/10-install-coolybot-lib.sh
+  - $CLB_SCRIPTS/11-generate-entities.sh
+  - $CLB_SCRIPTS/12-generate-project.sh
+  - $CLB_SCRIPTS/13-replace-version-generated-project.sh
+  - $CLB_SCRIPTS/14-coolybot-info.sh
+
+#----------------------------------------------------------------------
+# Launch tests
+#----------------------------------------------------------------------
+script:
+  - $CLB_SCRIPTS/20-docker-compose.sh
+  - $CLB_SCRIPTS/21-tests-backend.sh
+  - $CLB_SCRIPTS/22-tests-frontend.sh
+  - $CLB_SCRIPTS/23-package.sh
+  - $CLB_SCRIPTS/24-tests-e2e.sh
+  - $CLB_SCRIPTS/25-sonar-analyze.sh
+
+#----------------------------------------------------------------------
+# Cache
+#----------------------------------------------------------------------
+before_cache:
+  - rm -rf $HOME/.m2/repository/io/github/coolybot/coolybot-framework/
+  - rm -rf $HOME/.m2/repository/io/github/coolybot/coolybot-dependencies/
+  - rm -rf $HOME/.m2/repository/io/github/coolybot/coolybot-parent/

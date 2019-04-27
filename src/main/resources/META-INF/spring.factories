@@ -1,9 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  io.github.coolys.config.apidoc.SwaggerAutoConfiguration,\
-  io.github.coolys.config.apidoc.SwaggerPluginsAutoConfiguration,\
-  io.github.coolys.config.CoolybotProperties,\
-  io.github.coolys.security.uaa.UaaAutoConfiguration,\
-  io.github.coolys.config.info.CoolybotInfoContributorConfiguration,\
-  io.github.coolys.config.metric.CoolybotMetricsEndpointConfiguration,\
-  io.github.coolys.config.metric.CoolybotLoggingMetricsExportConfiguration,\
-  io.github.coolys.security.ssl.UndertowSSLConfiguration

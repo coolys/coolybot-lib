@@ -1,5 +1,5 @@
 
-    Copyright 2019 the Coolybot project and the respective Coolybot contributors
+    Copyright 2013-2019 the Coolybot project and the respective Coolybot contributors
 
                                  Apache License
                            Version 2.0, January 2004
